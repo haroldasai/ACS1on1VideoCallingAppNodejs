@@ -1,10 +1,12 @@
 // Make sure to install the necessary dependencies
-const { CallClient, VideoStreamRenderer, LocalVideoStream, Features } = require('@azure/communication-calling');
+const { CallClient, VideoStreamRenderer, LocalVideoStream, Features} = require('@azure/communication-calling');
 const { AzureCommunicationTokenCredential } = require('@azure/communication-common');
 const { AzureLogger, setLogLevel } = require("@azure/logger");
 
 const { Chart, registerables } = require('chart.js');
 Chart.register(...registerables);
+
+//import chart
 
 // Set the log level and output
 setLogLevel('error');
@@ -33,7 +35,8 @@ let connectedLabel = document.getElementById('connectedLabel');
 let remoteVideoContainer = document.getElementById('remoteVideoContainer');
 let localVideoContainer = document.getElementById('localVideoContainer');
 
-//Chart 
+
+//chart config here
 const ctx = document.getElementById('myChart').getContext('2d');
 const myChart = new Chart(ctx, {
     type: 'line',
@@ -62,7 +65,7 @@ const myChart = new Chart(ctx, {
         }
     }
 });
-///
+
 
 /**
  * Using the CallClient, initialize a CallAgent instance with a CommunicationUserCredential which will enable us to make outgoing calls and receive incoming calls. 
@@ -197,16 +200,16 @@ subscribeToCall = (call) => {
             });
         });
 
+        //Media Quality Statistics Code here
         const mediaStatsCollectorOptions = {
-            aggregationInterval: 2,
-            dataPointsPerAggregation: 5
+            aggregationInterval: 2,   //default 10
+            dataPointsPerAggregation: 5  // default 6
         };
         const mediaStatsFeature = call.feature(Features.MediaStats);
         const mediaStatsCollector = mediaStatsFeature.startCollector(mediaStatsCollectorOptions);
         mediaStatsCollector.on('mediaStatsEmitted', (mediaStats) => {
             console.log('media stats:', mediaStats.stats);
-            console.log('media stats collectionInterval:', mediaStats.collectionInterval);
-            console.log('media stats aggregationInterval:', mediaStats.aggregationInterval);
+
             const dataSet = mediaStats.stats.videoRecvPackets.raw;
             for(var i=0; i<dataSet.length; i++){
                 myChart.data.datasets[0].data.push(dataSet[i]);
@@ -214,8 +217,9 @@ subscribeToCall = (call) => {
                     myChart.data.datasets[0].data.shift();
                 }
             }
-            myChart.update();
+            myChart.update();        
         });
+
     } catch (error) {
         console.error(error);
     }
